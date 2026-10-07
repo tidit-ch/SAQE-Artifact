@@ -1,0 +1,10 @@
+/target
+/.idea
+data/train.csv
+data/chunks/*
+data/*
+.ipynb_checkpoints/
+dbs/influx_data/
+logs/*log*
+.DS_Store
+/benchmark_results/

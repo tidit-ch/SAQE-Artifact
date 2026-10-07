@@ -1,0 +1,3 @@
+[submodule "build/mobilitydb/MobilityDB-src"]
+	path = build/mobilitydb/MobilityDB-src
+	url = https://github.com/MobilityDB/MobilityDB.git

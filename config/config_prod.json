@@ -1,0 +1,38 @@
+{
+	"data_source": {
+		"csv": {
+			"berlinmod": {
+				"trips": "",
+				"periods": "",
+				"regions": "",
+				"points": "",
+				"instants": "",
+				"datamcar": "",
+				"licences": ""
+			},
+			"porto_taxi": "",
+			"oystercatcher_belgium": ""
+		}
+	},
+	"environment": "production",
+	"postgres": {
+		"user": "user",
+		"password": "password",
+		"host": "host.docker.internal",
+		"db": "gis",
+		"port": 5433,
+		"sslmode": "disable"
+	},
+	"influx": {
+		"db": "test_db",
+		"token": "",
+		"url": "http://chameleon_influxdb:8181",
+		"precision": "auto"
+	},
+	"server": {
+		"port": 3000
+	},
+	"logger": {
+		"level": "1"
+	}
+}

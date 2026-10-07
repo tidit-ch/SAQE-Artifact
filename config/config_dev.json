@@ -1,0 +1,46 @@
+{
+	"data_source": {
+		"csv": {
+			"berlinmod": {
+				"trips": "./data/berlin_mod/trips",
+				"periods": "./data/berlin_mod/periods",
+				"regions": "./data/berlin_mod/regions",
+				"points": "./data/berlin_mod/points",
+				"instants": "./data/berlin_mod/instants",
+				"datamcar": "./data/berlin_mod/datamcar",
+				"licences": "./data/berlin_mod/licences"
+			},
+			"porto_taxi": "./data/porto_taxi",
+			"oystercatcher_belgium": "./data/oystercatcher_belgium/sample_oystercatcher.csv"
+		}
+	},
+	"environment": "development",
+	"postgres": {
+		"user": "user",
+		"password": "password",
+		"host": "host.docker.internal",
+		"db": "gis",
+		"port": 5432,
+		"sslmode": "disable"
+	},
+	"influx": {
+		"db": "test_db",
+		"token": "",
+		"url": "http://host.docker.internal:8181",
+		"precision": "auto"
+	},
+	"map_matching": {
+		"endpoint": "http://host.docker.internal:8989",
+		"profile": "car",
+		"gps_accuracy": 40.0,
+		"request_timeout_ms": 30000,
+		"concurrency": 16,
+		"use_timestamps": false
+	},
+	"server": {
+		"port": 3000
+	},
+	"logger": {
+		"level": "0"
+	}
+}

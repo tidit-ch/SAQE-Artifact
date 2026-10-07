@@ -1,0 +1,82 @@
+name: chameleon-mobilitydb
+
+services:
+  mobilitydb:
+    build:
+      context: ./MobilityDB-src
+      dockerfile: ../Dockerfile
+      args:
+        BASE_IMAGE: postgis/postgis
+    image: mobilitydb-local:default
+    container_name: mobilitydb
+    restart: always
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: mobilitydb
+    volumes:
+      - mobilitydb_data:/var/lib/postgresql
+      - ../../data/berlinmod:/home/mobilitydb/BerlinMOD:ro
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - work_mem=64MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - effective_cache_size=1536MB
+
+    profiles:
+      - default
+
+  mobilitydb-arm64:
+    build:
+      context: ./MobilityDB-src
+      dockerfile: ../Dockerfile
+      args:
+        BASE_IMAGE: imresamu/postgis
+    image: mobilitydb-local:arm64
+    container_name: mobilitydb
+    restart: always
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: mobilitydb
+    volumes:
+      - mobilitydb_data:/var/lib/postgresql
+      - ../../data/berlinmod:/home/mobilitydb/BerlinMOD:ro
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - work_mem=64MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - effective_cache_size=1536MB
+
+    profiles:
+      - arm64
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  mobilitydb_data:
+  pgadmin_data:

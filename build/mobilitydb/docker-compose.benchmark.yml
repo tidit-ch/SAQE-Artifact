@@ -1,0 +1,112 @@
+name: chameleon-mobilitydb-benchmark
+
+# Dedicated MobilityDB container for the parallelism/core-count experiment -
+# kept completely separate from docker-compose.yml's `mobilitydb` service
+# (same container_name there would conflict anyway), exactly mirroring the
+# pattern already used for SAQE's own Postgres backend
+# (../docker-compose.benchmark.yml's chameleon_postgis_benchmark vs.
+# ../docker-compose.dev.yml's chameleon_postgis_dev) - so the official,
+# already-reported baseline measurements (docker-compose.yml, untouched
+# Postgres defaults) stay exactly reproducible, while this file is free to
+# be tuned/retuned for the experiment without risk of silently drifting
+# from what the README documents, or of a settings-recreation mismatch like
+# the one this project already hit once (see parallelism-investigation
+# notes: a docker-compose.yml revert didn't retroactively apply to an
+# already-running container, since max_parallel_workers_per_gather is a
+# Postgres startup flag, not an initdb-time script).
+#
+# Settings here are kept identical to ../docker-compose.benchmark.yml's
+# chameleon_postgis_benchmark (32 workers, work_mem=512MB - see that file's
+# own comment for the full reasoning behind those two numbers) - symmetric
+# tuning matters here specifically because this whole experiment exists to
+# compare SAQE's Postgres backend against MobilityDB fairly; raising one
+# side's parallelism/memory without the other would reintroduce exactly the
+# one-sided-tuning confound this project has otherwise been careful to
+# avoid.
+#
+# Use via: --profile default (amd64) or --profile arm64, same as
+# docker-compose.yml - e.g.
+#   docker compose -f build/mobilitydb/docker-compose.benchmark.yml --profile default up -d --build mobilitydb-benchmark
+# Same port as the production container (25432) deliberately - bring this
+# one up *instead of* (not alongside) the production `mobilitydb` container,
+# same swap-don't-stack pattern as chameleon_postgis_benchmark/
+# chameleon_postgis_dev, so run_benchmark_comparison_17.sh's hardcoded port
+# needs no change - whichever MobilityDB container happens to be running is
+# just what gets used.
+services:
+  mobilitydb-benchmark:
+    build:
+      context: ./MobilityDB-src
+      dockerfile: ../Dockerfile
+      args:
+        BASE_IMAGE: postgis/postgis
+    image: mobilitydb-local:default
+    container_name: mobilitydb-benchmark
+    restart: always
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: mobilitydb
+    volumes:
+      - mobilitydb_benchmark_data:/var/lib/postgresql
+      - ../../data/berlinmod:/home/mobilitydb/BerlinMOD:ro
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - work_mem=512MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - effective_cache_size=1536MB
+      - -c
+      - max_worker_processes=32
+      - -c
+      - max_parallel_workers=32
+      - -c
+      - max_parallel_workers_per_gather=32
+    profiles:
+      - default
+
+  mobilitydb-benchmark-arm64:
+    build:
+      context: ./MobilityDB-src
+      dockerfile: ../Dockerfile
+      args:
+        BASE_IMAGE: imresamu/postgis
+    image: mobilitydb-local:arm64
+    container_name: mobilitydb-benchmark
+    restart: always
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: mobilitydb
+    volumes:
+      - mobilitydb_benchmark_data:/var/lib/postgresql
+      - ../../data/berlinmod:/home/mobilitydb/BerlinMOD:ro
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - work_mem=512MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - effective_cache_size=1536MB
+      - -c
+      - max_worker_processes=32
+      - -c
+      - max_parallel_workers=32
+      - -c
+      - max_parallel_workers_per_gather=32
+    profiles:
+      - arm64
+
+volumes:
+  mobilitydb_benchmark_data:

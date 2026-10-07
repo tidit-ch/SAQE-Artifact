@@ -1,0 +1,84 @@
+# Dedicated Postgres container for the SAQE-vs-MobilityDB benchmark's own
+# "SAQE-Postgres" backend - kept completely separate from
+# chameleon_postgis_dev (build/docker-compose.dev.yml), which regular dev
+# work (web_dev) also depends on, so tuning this one for benchmark fairness
+# never affects everyday development.
+#
+# Settings here deliberately mirror build/mobilitydb/docker-compose.yml's
+# MobilityDB container (same memory settings, same parallel-worker ceiling)
+# and SAQE's own DataFusion target_partitions
+# (benches/saqe_vs_mobilitydb/mod.rs) - see build/mobilitydb/NOTES.md's
+# "Parallelism/core-count parity" note for why: without this, SAQE's own
+# Postgres backend would be measured under a much lower per-query
+# parallelism ceiling (Postgres's untouched default is 2) than SAQE's own
+# DataFusion CSV/Parquet backends, and under untouched (much smaller)
+# memory defaults than MobilityDB's container gets - neither is a fair
+# basis for comparison. As of 2026-10-01 this is 32 workers (raised from
+# 8, alongside SAQE's own target_partitions and MobilityDB's container).
+# max_worker_processes and max_parallel_workers are raised alongside
+# max_parallel_workers_per_gather, not just the latter alone, since
+# Postgres silently caps per-query parallelism at whichever of the three
+# is smallest.
+#
+# work_mem raised from 64MB to 512MB (2026-10-01) alongside the worker-count
+# bump, since work_mem is a per-worker, per-sort/hash-operation allocation -
+# more workers multiplies its effective footprint. 512MB was chosen, not a
+# larger value, based on: (1) actual evidence - EXPLAIN ANALYZE showed only
+# a few MB of disk-spilling at the old 64MB setting on mond47's 500GB-RAM
+# host, so 512MB already gives ~2 orders of magnitude of headroom over the
+# observed need; (2) worst-case exposure - with max_parallel_workers_per_
+# gather=32 and several queries having 3-5+ concurrent sort/hash/aggregate
+# nodes, worst-case memory for one query is roughly workers x work_mem x
+# concurrent operations, which at 512MB stays a safe ~15-20% of host RAM
+# rather than threatening to approach it; (3) this project's own history -
+# a self-join query previously caused a genuine ~524GB RSS OOM crash (see
+# q5/q12's CTE-based fix), so staying well clear of that territory matters
+# more than chasing a larger, unearned number.
+#
+# Use via: CONFIG_FILE=config/config_benchmark.json, and bring this
+# container up instead of (not in addition to, same container_name would
+# conflict) chameleon_postgis_dev - see build/mobilitydb/README.md's
+# "Running the full benchmark comparison" section.
+services:
+  chameleon_postgis_benchmark:
+    build:
+      context: .
+      dockerfile: postgis-dev.Dockerfile
+      args:
+        BASE_IMAGE: ${POSTGIS_BASE_IMAGE:-postgis/postgis:17-3.5}
+    container_name: chameleon_postgis_benchmark
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gis
+    volumes:
+      - ../config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-benchmark-data:/var/lib/postgresql
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - work_mem=512MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - effective_cache_size=1536MB
+      - -c
+      - max_worker_processes=32
+      - -c
+      - max_parallel_workers=32
+      - -c
+      - max_parallel_workers_per_gather=32
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d gis -h localhost"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres-benchmark-data:

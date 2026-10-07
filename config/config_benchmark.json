@@ -1,0 +1,31 @@
+{
+	"environment": "development",
+	"postgres": {
+		"user": "user",
+		"password": "password",
+		"host": "localhost",
+		"db": "gis",
+		"port": 5434,
+		"sslmode": "disable"
+	},
+	"influx": {
+		"db": "test_db",
+		"token": "",
+		"url": "http://localhost:8181",
+		"precision": "auto"
+	},
+	"map_matching": {
+		"endpoint": "http://localhost:8989",
+		"profile": "car",
+		"gps_accuracy": 40.0,
+		"request_timeout_ms": 30000,
+		"concurrency": 16,
+		"use_timestamps": false
+	},
+	"server": {
+		"port": 3000
+	},
+	"logger": {
+		"level": "0"
+	}
+}

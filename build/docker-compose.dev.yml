@@ -1,0 +1,92 @@
+services:
+  web_dev:
+    build:
+      context: ..
+      dockerfile: build/dev.Dockerfile
+    ports:
+      - "3000:3000"
+    environment: 
+      CONFIG_FILE: "/usr/src/app/config/config_dev.json"
+      CARGO_INCREMENTAL: "1"
+    command:  cargo watch --why --delay 0.5 --ignore 'target/*' --ignore 'logs/*' --ignore 'data/*' -x run
+    # command: cargo watch -x run 
+    volumes:
+      - ../src:/usr/src/app/src
+      - ../benches:/usr/src/app/benches
+      - ../config:/usr/src/app/config
+      - ../data:/usr/src/app/data
+      - ../logs:/usr/src/app/logs
+      - ../Cargo.toml:/usr/src/app/Cargo.toml
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-target:/usr/src/app/target
+    depends_on:
+      chameleon_postgis_dev:
+        condition: service_healthy
+      chameleon_influxdb_dev:
+        condition: service_started
+
+  chameleon_postgis_dev:
+    # Built (not pulled bare) from postgis-dev.Dockerfile, which pins the
+    # same base image tag build/mobilitydb/Dockerfile uses
+    # (postgis/postgis:17-3.5 on amd64) *and* replicates its
+    # `apt-get install libgeos-dev` step - matching the tag alone isn't
+    # enough, since that step is what actually pulls the newer PGDG-repo
+    # GEOS MobilityDB ends up running (3.14.1), not the base image's
+    # originally bundled one (confirmed directly - see that Dockerfile's
+    # own comment and BENCHMARK.md's "GEOS version mismatch" confound,
+    # which this is intended to close, not just keep reproducibly
+    # disclosed). postgis/postgis is amd64-only; on Apple Silicon (or any
+    # arm64 host) override BASE_IMAGE via `POSTGIS_BASE_IMAGE=imresamu/postgis:17-3.5`
+    # (env var or .env file, full image reference - tag or digest) - the
+    # same multi-arch fork build/mobilitydb/Dockerfile already uses for its
+    # own arm64 profile, for the same reason (avoids QEMU emulation).
+    build:
+      context: .
+      dockerfile: postgis-dev.Dockerfile
+      args:
+        BASE_IMAGE: ${POSTGIS_BASE_IMAGE:-postgis/postgis:17-3.5}
+    container_name: chameleon_postgis_dev
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gis
+    volumes:
+      - ../config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d gis -h localhost"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+
+  chameleon_influxdb_dev:
+    image: influxdb:3.0.2-core
+    container_name: chameleon_influxdb_dev
+    restart: always
+    ports:
+      - "8181:8181"
+    volumes:
+      - influx-data:/var/lib/influxdb3
+      - influx-config:/etc/influxdb3
+    command:
+      - influxdb3
+      - serve
+      - --node-id=node0
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3
+      - --query-file-limit=2400
+      - --gen1-duration=10m
+    user: "0:0" 
+    environment:
+      - INFLUX_TOKEN
+
+volumes:
+  cargo-registry:
+  cargo-target:
+  postgres-data:
+  influx-data:
+  influx-config:

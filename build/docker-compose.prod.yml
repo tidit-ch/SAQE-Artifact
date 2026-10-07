@@ -1,0 +1,55 @@
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3000:3000"
+    environment:
+      CONFIG_FILE: "/usr/src/app/config/config_prod.json"
+    command: ["./target/release/chameleon-datafusion"]
+    volumes:
+      - /home/gitlab-runner/chameleon_backend/server/data:/usr/src/app/data
+      - /home/gitlab-runner/chameleon_backend/server/logs:/usr/src/app/logs
+      - ../config:/usr/src/app/config
+    depends_on:
+      - chameleon_postgis
+      - chameleon_influxdb
+
+  chameleon_postgis:
+    image: postgis/postgis:latest
+    container_name: chameleon_postgis
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gis
+    volumes:
+      - ../config:/docker-entrypoint-initdb.d
+      - /home/gitlab-runner/chameleon_backend/dbs/sql:/var/lib/postgresql
+
+  chameleon_influxdb:
+    image: influxdb:3.0.2-core
+    container_name: chameleon_influxdb
+    restart: always
+    ports:
+      - "8181:8181"
+    volumes:
+      - /home/gitlab-runner/chameleon_backend/dbs/influx/data:/var/lib/influxdb3
+      - /home/gitlab-runner/chameleon_backend/dbs/influx/config:/etc/influxdb3
+    command:
+      - influxdb3
+      - serve
+      - --node-id=node0
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3
+      - --query-file-limit=2400
+      - --gen1-duration=10m
+    user: "0:0" 
+    environment:
+      - INFLUX_TOKEN
+

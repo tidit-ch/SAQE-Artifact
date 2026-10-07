@@ -1,0 +1,412 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Design tokens
+   ========================================================================== */
+:root {
+	--color-page: #f8fafc;
+	--color-panel: #ffffff;
+	--color-sunken: #f1f5f9;
+	--color-border: #e2e8f0;
+	--color-border-strong: #cbd5e1;
+	--color-ink-900: #0f172a;
+	--color-ink-700: #334155;
+	--color-ink-500: #64748b;
+	--color-ink-400: #94a3b8;
+	--color-accent: #2563eb;
+	--color-accent-hover: #1d4ed8;
+	--color-accent-soft: #eff6ff;
+	--color-success: #059669;
+	--color-warning: #d97706;
+	--color-danger: #dc2626;
+	--radius-sm: 4px;
+	--radius-md: 6px;
+	--radius-lg: 8px;
+}
+
+@layer base {
+	html,
+	body {
+		@apply text-[13px] text-ink-900 bg-surface-page antialiased;
+		font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+	}
+
+	*:focus-visible {
+		@apply outline-none ring-2 ring-accent/40 ring-offset-0;
+	}
+
+	::selection {
+		background-color: rgb(37 99 235 / 0.18);
+	}
+
+	/* Tame native form controls */
+	select,
+	input[type="text"],
+	input[type="number"],
+	input[type="search"],
+	input[type="datetime-local"],
+	textarea {
+		@apply font-sans;
+	}
+
+	/* Slim, professional scrollbar */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: #cbd5e1 transparent;
+	}
+	*::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	*::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	*::-webkit-scrollbar-thumb {
+		background: #cbd5e1;
+		border-radius: 999px;
+		border: 2px solid transparent;
+		background-clip: padding-box;
+	}
+	*::-webkit-scrollbar-thumb:hover {
+		background: #94a3b8;
+		background-clip: padding-box;
+		border: 2px solid transparent;
+	}
+}
+
+/* ==========================================================================
+   Layout primitives
+   ========================================================================== */
+@layer components {
+	.panel {
+		@apply bg-surface-panel border border-slate-200 rounded-md shadow-xs;
+	}
+
+	.divider {
+		@apply h-px bg-slate-200 w-full;
+	}
+
+	/* Section header inside the sidebar — collapsible row look */
+	.section {
+		@apply border-b border-slate-200 last:border-b-0;
+	}
+
+	.section-header {
+		@apply flex items-center justify-between w-full
+			px-3 h-9 text-[11px] font-semibold uppercase tracking-wider
+			text-ink-500 hover:text-ink-700 hover:bg-slate-50
+			transition-colors cursor-pointer select-none;
+	}
+
+	.section-header .chevron {
+		@apply text-ink-400 transition-transform duration-150;
+		font-size: 18px;
+	}
+
+	.section-body {
+		@apply px-3 pb-3 pt-1 flex flex-col gap-2.5;
+	}
+
+	/* ==========================================================================
+	   Typography helpers
+	   ========================================================================== */
+	.field-label {
+		@apply text-[10px] font-semibold uppercase tracking-wider text-ink-500;
+	}
+
+	.hint {
+		@apply text-[11px] text-ink-500;
+	}
+
+	.code {
+		@apply font-mono text-[12px];
+	}
+
+	/* ==========================================================================
+	   Form controls
+	   ========================================================================== */
+	.input,
+	.select,
+	.textarea {
+		@apply w-full bg-white text-ink-900 placeholder:text-ink-400
+			border border-slate-300 rounded-md
+			text-[12.5px] leading-5
+			px-2 py-1.5
+			transition-colors
+			hover:border-slate-400
+			focus:border-accent focus:ring-2 focus:ring-accent/30
+			disabled:bg-slate-50 disabled:text-ink-400 disabled:cursor-not-allowed;
+	}
+
+	.select {
+		@apply appearance-none pr-7 cursor-pointer;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 8px center;
+		background-size: 12px;
+	}
+
+	.textarea {
+		@apply resize-y min-h-[80px];
+	}
+
+	.checkbox {
+		@apply h-3.5 w-3.5 rounded-[3px] border border-slate-300
+			text-accent focus:ring-2 focus:ring-accent/30
+			cursor-pointer accent-[var(--color-accent)];
+	}
+
+	/* ==========================================================================
+	   Buttons
+	   ========================================================================== */
+	.btn {
+		@apply inline-flex items-center justify-center gap-1.5
+			rounded-md text-[12.5px] font-medium
+			px-3 h-8
+			transition-all
+			active:scale-[0.98]
+			disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
+			focus:outline-none focus:ring-2 focus:ring-accent/30;
+	}
+
+	.btn-sm {
+		@apply h-7 px-2.5 text-[11.5px] gap-1;
+	}
+
+	.btn-xs {
+		@apply h-6 px-2 text-[11px] gap-1 rounded;
+	}
+
+	.btn-primary {
+		@apply bg-accent text-white border border-accent
+			hover:bg-accent-hover hover:border-accent-hover
+			shadow-xs;
+	}
+
+	.btn-secondary {
+		@apply bg-white text-ink-700 border border-slate-300
+			hover:bg-slate-50 hover:text-ink-900 hover:border-slate-400
+			shadow-xs;
+	}
+
+	.btn-ghost {
+		@apply bg-transparent text-ink-700
+			hover:bg-slate-100 hover:text-ink-900;
+	}
+
+	.btn-success {
+		@apply bg-emerald-600 text-white border border-emerald-600
+			hover:bg-emerald-700 hover:border-emerald-700 shadow-xs;
+	}
+
+	.btn-danger {
+		@apply bg-white text-red-600 border border-slate-300
+			hover:bg-red-50 hover:border-red-300;
+	}
+
+	/* Compact icon-only button */
+	.icon-btn {
+		@apply inline-flex items-center justify-center
+			h-7 w-7 rounded
+			text-ink-500 hover:text-ink-900 hover:bg-slate-100
+			transition-colors active:scale-95;
+	}
+
+	.icon-btn--danger {
+		@apply text-ink-400 hover:text-red-600 hover:bg-red-50;
+	}
+
+	.icon-btn--accent {
+		@apply text-ink-500 hover:text-accent hover:bg-accent-soft;
+	}
+
+	/* Icon button used inline within a row of fields */
+	.icon-btn-inline {
+		@apply inline-flex items-center justify-center
+			h-6 w-6 rounded
+			text-ink-400 hover:text-red-600 hover:bg-red-50
+			transition-colors active:scale-95 shrink-0;
+	}
+
+	/* ==========================================================================
+	   Tabs (underlined, Grafana-style)
+	   ========================================================================== */
+	.tab-bar {
+		@apply flex items-center gap-0 border-b border-slate-200 px-3;
+	}
+
+	.tab {
+		@apply relative inline-flex items-center justify-center
+			h-9 px-3 text-[12.5px] font-medium
+			text-ink-500 hover:text-ink-900
+			transition-colors cursor-pointer
+			border-b-2 border-transparent;
+	}
+
+	.tab[data-active="true"] {
+		@apply text-accent border-accent;
+	}
+
+	/* ==========================================================================
+	   Pill / segmented toggle
+	   ========================================================================== */
+	.seg {
+		@apply inline-flex items-center rounded-md border border-slate-300 bg-white p-0.5 gap-0.5 shadow-xs;
+	}
+
+	.seg-btn {
+		@apply inline-flex items-center justify-center
+			h-6 px-2.5 rounded text-[11px] font-medium
+			text-ink-500 hover:text-ink-900
+			transition-colors cursor-pointer;
+	}
+
+	.seg-btn[data-active="true"] {
+		@apply bg-accent text-white shadow-xs;
+	}
+
+	/* ==========================================================================
+	   Badges / chips
+	   ========================================================================== */
+	.badge {
+		@apply inline-flex items-center gap-1 rounded
+			px-1.5 h-[18px] text-[10px] font-medium
+			border;
+	}
+
+	.badge--neutral {
+		@apply bg-slate-100 text-ink-700 border-slate-200;
+	}
+
+	.badge--blue {
+		@apply bg-accent-soft text-accent border-blue-100;
+	}
+
+	.badge--purple {
+		@apply bg-violet-50 text-violet-700 border-violet-100;
+	}
+
+	.badge--amber {
+		@apply bg-amber-50 text-amber-700 border-amber-100;
+	}
+
+	/* ==========================================================================
+	   Code preview
+	   ========================================================================== */
+	.code-block {
+		@apply font-mono text-[11.5px] leading-5
+			bg-surface-code text-slate-100
+			rounded-md px-3 py-2
+			whitespace-pre-wrap break-all
+			border border-slate-800;
+	}
+
+	.code-block--light {
+		@apply font-mono text-[11.5px] leading-5
+			bg-slate-50 text-ink-900
+			rounded-md px-2.5 py-1.5
+			whitespace-pre-wrap break-all
+			border border-slate-200;
+	}
+
+	/* Group well — visually nests sub-conditions */
+	.well {
+		@apply rounded-md border border-slate-200 bg-slate-50/60 p-2;
+	}
+
+	.well--accent {
+		@apply rounded-md border-l-2 border-l-accent border-y border-r border-slate-200 bg-accent-soft/40 p-2;
+	}
+}
+
+/* ==========================================================================
+   Material symbols sizing helper
+   ========================================================================== */
+.material-symbols-outlined {
+	font-variation-settings:
+		"FILL" 0,
+		"wght" 400,
+		"GRAD" 0,
+		"opsz" 20;
+	user-select: none;
+}
+
+.icon-sm {
+	font-size: 16px !important;
+}
+.icon-md {
+	font-size: 18px !important;
+}
+
+/* ==========================================================================
+   Leaflet & Geoman overrides — quieter, more compact toolbar
+   ========================================================================== */
+
+.leaflet-container {
+	font-family: inherit;
+}
+
+.leaflet-bar,
+.leaflet-bar a,
+.leaflet-bar a:hover {
+	border-color: var(--color-border) !important;
+	box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+.leaflet-bar a {
+	background-color: rgba(255, 255, 255, 0.95) !important;
+	color: var(--color-ink-700) !important;
+	width: 28px !important;
+	height: 28px !important;
+	line-height: 28px !important;
+	font-size: 14px !important;
+	backdrop-filter: blur(6px);
+}
+
+.leaflet-bar a:hover {
+	background-color: var(--color-accent-soft) !important;
+	color: var(--color-accent) !important;
+}
+
+.leaflet-control-zoom {
+	margin-top: 12px !important;
+	margin-left: 12px !important;
+	border-radius: 6px !important;
+	overflow: hidden;
+}
+
+/* Geoman toolbar: slimmer, lower-key */
+.leaflet-pm-toolbar .leaflet-pm-icon {
+	background-color: rgba(255, 255, 255, 0.95) !important;
+	border-color: var(--color-border) !important;
+	transition: all 120ms ease;
+}
+
+.leaflet-pm-toolbar .leaflet-pm-icon:hover {
+	background-color: var(--color-accent-soft) !important;
+}
+
+.leaflet-pm-toolbar .button-container .leaflet-buttons-control-button {
+	width: 28px !important;
+	height: 28px !important;
+}
+
+.leaflet-pm-toolbar .control-block {
+	border-radius: 6px !important;
+	overflow: hidden;
+	box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+.leaflet-control-attribution {
+	background: rgba(255, 255, 255, 0.85) !important;
+	font-size: 10px !important;
+	padding: 2px 6px !important;
+	border-radius: 4px 0 0 0;
+	color: var(--color-ink-500) !important;
+}
+
+.leaflet-control-attribution a {
+	color: var(--color-ink-700) !important;
+}

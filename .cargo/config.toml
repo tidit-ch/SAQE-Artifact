@@ -1,0 +1,13 @@
+# Linker overrides (clang + mold) removed for the artifact: they only speed up
+# developer builds and would fail on machines without mold installed.
+
+[build]
+incremental = true
+jobs = 4
+pipelining = true
+
+[profile.dev]
+opt-level = 0
+debug = 2  # Reduced debug info for faster builds
+split-debuginfo = "unpacked"
+incremental = false

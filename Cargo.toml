@@ -1,0 +1,70 @@
+[package]
+name = "chameleon-datafusion"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[dependencies]
+arrow = "^56.0.0"
+arrow-flight = "^56.0.0"
+arrow-schema = "^56.0.0"
+actix-cors = "0.7.1"
+actix-web = "4.9.0"
+async-trait = "0.1.85"
+chrono = { version = "=0.4.41", features = ["unstable-locales"] }
+config = "0.15.11"
+datafusion = { version = "50.3.0", features = ["backtrace"] }
+deadpool-postgres = "0.14.1"
+derive_more = "2.0.1"
+geo = "0.31.0"
+postgis = "0.9.0"
+serde = { version = "1.0.218", features = ["derive"]}
+serde_json = "1.0.139"
+tokio = { version = "1.45", features = ["full"] }
+tokio-postgres = { version = "0.7.13", features = ["with-chrono-0_4"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["json", "fmt"]}
+tonic = "0.12.3"
+uuid = "1.16.0"
+csv = "1.3.1"
+futures = "0.3.31"
+object_store = "0.11.2"
+time = "0.3.41"
+thiserror = "2.0.12"
+wkt = "0.14.0"
+rayon = "1.10.0"
+async-stream = "0.3"
+num_cpus = "1.16.0"
+datafusion-federation = { version = "=0.4.10", features = ["sql"] }
+reqwest = { version = "0.12.21", features = ["stream", "native-tls-vendored"] }
+datafusion-table-providers = { version = "=0.8.2", features = ["postgres"] }
+itertools = "0.14.0"
+futures-util = "0.3.31"
+strum = "0.27.1"
+strum_macros = "0.27.1"
+parquet = "53.3.0"
+geoarrow-schema = { version  = "=0.6.2" }
+geoarrow-cast = { version  = "=0.6.2" }
+geoarrow-array = { version  = "=0.6.2" }
+geoarrow-expr-geo = { version = "=0.6.2" }
+geodatafusion = { version = "=0.1.1" }
+geo-traits = "0.3.0"
+geo-types = "0.7.16"
+tracing-log = "0.2.0"
+file-rotate = "0.8.0"
+anyhow = "1.0.102"
+bytes = "1.11.1"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["async_tokio"] }
+
+[[bench]]
+name = "bench_saqe_vs_mobilitydb_timed_all"
+harness = false
+
+[[bench]]
+name = "bench_saqe_vs_mobilitydb_tuple_check"
+harness = false
